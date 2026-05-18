@@ -8,20 +8,22 @@ import (
 )
 
 type Config struct {
-	Port    string
-	DSN     string
-	GinMode string
+	Port      string
+	DSN       string
+	GinMode   string
+	JWTSecret string
 }
 
 func Load() *Config {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Overload(); err != nil {
 		log.Println("No .env file found, using environment variables")
 	}
 
 	return &Config{
-		Port:    getEnv("PORT", "8080"),
-		DSN:     getEnv("DATABASE_URL", ""),
-		GinMode: getEnv("GIN_MODE", "debug"),
+		Port:      getEnv("PORT", "8080"),
+		DSN:       getEnv("DATABASE_URL", ""),
+		GinMode:   getEnv("GIN_MODE", "debug"),
+		JWTSecret: getEnv("JWT_SECRET", ""),
 	}
 }
 
