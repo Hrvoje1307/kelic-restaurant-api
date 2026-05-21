@@ -9,6 +9,39 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// RequireAuth validates a Supabase JWT and sets user_id, role, and email in context.
+func RequireAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		header := c.GetHeader("Authorization")
+		if !strings.HasPrefix(header, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token", "code": "UNAUTHORIZED"})
+			return
+		}
+		tokenStr := strings.TrimPrefix(header, "Bearer ")
+
+		secret := os.Getenv("JWT_SECRET")
+		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+			return []byte(secret), nil
+		}, jwt.WithValidMethods([]string{"HS256"}))
+
+		if err != nil || !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token", "code": "UNAUTHORIZED"})
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid claims", "code": "UNAUTHORIZED"})
+			return
+		}
+
+		c.Set("role", extractRole(claims))
+		c.Set("user_id", claims["sub"])
+		c.Set("email", claims["email"])
+		c.Next()
+	}
+}
+
 // RequireRole validates a Supabase JWT and checks that the user_metadata.role matches one of the allowed roles.
 func RequireRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -40,6 +73,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 			if role == allowed {
 				c.Set("role", role)
 				c.Set("user_id", claims["sub"])
+				c.Set("email", claims["email"])
 				c.Next()
 				return
 			}

@@ -34,6 +34,7 @@ func main() {
 
 	menuCategoryHandler := handlers.NewMenuCategoryHandler(repository.NewMenuCategoryRepo(pool))
 	menuItemHandler := handlers.NewMenuItemHandler(repository.NewMenuItemRepo(pool))
+	reservationHandler := handlers.NewReservationHandler(repository.NewReservationRepo(pool))
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -41,6 +42,7 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	admin := middleware.RequireRole("admin", "superadmin")
+	auth := middleware.RequireAuth()
 
 	api := r.Group("/api/v1")
 	{
@@ -64,6 +66,17 @@ func main() {
 				items.PUT("/:id", admin, menuItemHandler.Update)
 				items.DELETE("/:id", admin, menuItemHandler.Delete)
 			}
+		}
+
+		reservations := api.Group("/reservations")
+		{
+			reservations.GET("", admin, reservationHandler.List)
+			reservations.POST("", reservationHandler.Create)
+			reservations.GET("/availability", reservationHandler.Availability)
+			reservations.GET("/my", auth, reservationHandler.MyReservations)
+			reservations.GET("/:id", admin, reservationHandler.GetByID)
+			reservations.PATCH("/:id", admin, reservationHandler.UpdateStatus)
+			reservations.DELETE("/:id", auth, reservationHandler.Delete)
 		}
 	}
 
