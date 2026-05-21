@@ -41,6 +41,7 @@ func main() {
 	reservationHandler := handlers.NewReservationHandler(repository.NewReservationRepo(pool))
 	tableHandler := handlers.NewTableHandler(repository.NewTableRepo(pool))
 	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient)
+	userHandler := handlers.NewUserHandler(repository.NewUserRepo(pool))
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -48,6 +49,7 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	admin := middleware.RequireRole("admin", "superadmin")
+	superadmin := middleware.RequireRole("superadmin")
 	auth := middleware.RequireAuth()
 
 	api := r.Group("/api/v1")
@@ -101,6 +103,14 @@ func main() {
 				chat.GET("/:session_id", chatHandler.GetHistory)
 				chat.DELETE("/:session_id", chatHandler.DeleteSession)
 			}
+		}
+
+		users := api.Group("/users")
+		{
+			users.GET("/me", auth, userHandler.GetMe)
+			users.PUT("/me", auth, userHandler.UpdateMe)
+			users.GET("", admin, userHandler.List)
+			users.PATCH("/:id/role", superadmin, userHandler.UpdateRole)
 		}
 	}
 

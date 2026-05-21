@@ -235,6 +235,43 @@ definitions:
       time:
         type: string
     type: object
+  models.UserProfile:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.UserProfileInput:
+    properties:
+      avatar_url:
+        type: string
+      full_name:
+        type: string
+      phone:
+        type: string
+    type: object
+  models.UserRoleUpdate:
+    properties:
+      role:
+        enum:
+        - guest
+        - admin
+        - superadmin
+        type: string
+    required:
+    - role
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -1029,6 +1066,155 @@ paths:
       summary: Ažuriraj stol (admin)
       tags:
       - Stolovi
+  /users:
+    get:
+      parameters:
+      - description: Filter po ulozi
+        enum:
+        - guest
+        - admin
+        - superadmin
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserProfile'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Dohvati sve korisnike (admin)
+      tags:
+      - Korisnici
+  /users/{id}/role:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: UUID korisnika
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nova uloga
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRoleUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Promijeni ulogu korisnika (superadmin)
+      tags:
+      - Korisnici
+  /users/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Dohvati vlastiti profil
+      tags:
+      - Korisnici
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Profil
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserProfileInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ažuriraj vlastiti profil
+      tags:
+      - Korisnici
 securityDefinitions:
   BearerAuth:
     in: header
