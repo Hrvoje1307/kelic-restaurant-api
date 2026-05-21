@@ -35,6 +35,7 @@ func main() {
 	menuCategoryHandler := handlers.NewMenuCategoryHandler(repository.NewMenuCategoryRepo(pool))
 	menuItemHandler := handlers.NewMenuItemHandler(repository.NewMenuItemRepo(pool))
 	reservationHandler := handlers.NewReservationHandler(repository.NewReservationRepo(pool))
+	tableHandler := handlers.NewTableHandler(repository.NewTableRepo(pool))
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -66,6 +67,14 @@ func main() {
 				items.PUT("/:id", admin, menuItemHandler.Update)
 				items.DELETE("/:id", admin, menuItemHandler.Delete)
 			}
+		}
+
+		tables := api.Group("/tables")
+		{
+			tables.GET("", tableHandler.List)
+			tables.POST("", admin, tableHandler.Create)
+			tables.PUT("/:id", admin, tableHandler.Update)
+			tables.DELETE("/:id", admin, tableHandler.Delete)
 		}
 
 		reservations := api.Group("/reservations")

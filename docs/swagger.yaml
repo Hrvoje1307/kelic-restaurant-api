@@ -161,6 +161,8 @@ definitions:
     properties:
       capacity:
         type: integer
+      created_at:
+        type: string
       id:
         type: string
       is_active:
@@ -169,6 +171,25 @@ definitions:
         type: string
       table_number:
         type: integer
+    type: object
+  models.TableInput:
+    properties:
+      capacity:
+        minimum: 1
+        type: integer
+      is_active:
+        type: boolean
+      location:
+        enum:
+        - unutra
+        - terasa
+        - vip
+        type: string
+      table_number:
+        type: integer
+    required:
+    - capacity
+    - table_number
     type: object
   models.TimeSlot:
     properties:
@@ -762,6 +783,146 @@ paths:
       summary: Moje rezervacije (gost)
       tags:
       - Rezervacije
+  /tables:
+    get:
+      description: Javni endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Table'
+            type: array
+      summary: Dohvati sve stolove
+      tags:
+      - Stolovi
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Stol
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.TableInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Table'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Dodaj stol (admin)
+      tags:
+      - Stolovi
+  /tables/{id}:
+    delete:
+      parameters:
+      - description: UUID stola
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Obriši stol (admin)
+      tags:
+      - Stolovi
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: UUID stola
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Stol
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.TableInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Table'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Ažuriraj stol (admin)
+      tags:
+      - Stolovi
 securityDefinitions:
   BearerAuth:
     in: header
