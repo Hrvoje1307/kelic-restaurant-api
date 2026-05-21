@@ -9,6 +9,115 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
+        "/ai/chat": {
+            "post": {
+                "description": "Streaming SSE endpoint — vraća Server-Sent Events",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "AI Chat"
+                ],
+                "summary": "Pošalji poruku AI asistentu",
+                "parameters": [
+                    {
+                        "description": "Poruka",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ChatResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/chat/{session_id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI Chat"
+                ],
+                "summary": "Dohvati povijest razgovora",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID sesije",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ChatSession"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "AI Chat"
+                ],
+                "summary": "Obriši sesiju chata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID sesije",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Returns 200 if the service is up",
@@ -1136,6 +1245,60 @@
                     }
                 },
                 "date": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ChatMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ChatRequest": {
+            "type": "object",
+            "required": [
+                "message",
+                "session_id"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ChatResponse": {
+            "type": "object",
+            "properties": {
+                "done": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ChatSession": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ChatMessage"
+                    }
+                },
+                "session_id": {
                     "type": "string"
                 }
             }

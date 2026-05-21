@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	Port      string
-	DSN       string
-	GinMode   string
-	JWTSecret string
+	Port             string
+	DSN              string
+	GinMode          string
+	JWTSecret        string
+	AnthropicAPIKey  string
 }
 
 func Load() *Config {
@@ -20,10 +21,11 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:      getEnv("PORT", "8080"),
-		DSN:       getEnv("DATABASE_URL", ""),
-		GinMode:   getEnv("GIN_MODE", "debug"),
-		JWTSecret: getEnv("JWT_SECRET", ""),
+		Port:            getEnv("PORT", "8080"),
+		DSN:             getEnv("DATABASE_URL", ""),
+		GinMode:         getEnv("GIN_MODE", "debug"),
+		JWTSecret:       getEnv("JWT_SECRET", ""),
+		AnthropicAPIKey: getEnv("ANTHROPIC_API_KEY", ""),
 	}
 }
 

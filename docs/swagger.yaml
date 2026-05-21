@@ -9,6 +9,41 @@ definitions:
       date:
         type: string
     type: object
+  models.ChatMessage:
+    properties:
+      content:
+        type: string
+      role:
+        type: string
+    type: object
+  models.ChatRequest:
+    properties:
+      message:
+        type: string
+      session_id:
+        type: string
+    required:
+    - message
+    - session_id
+    type: object
+  models.ChatResponse:
+    properties:
+      done:
+        type: boolean
+      message:
+        type: string
+      session_id:
+        type: string
+    type: object
+  models.ChatSession:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/models.ChatMessage'
+        type: array
+      session_id:
+        type: string
+    type: object
   models.MenuCategory:
     properties:
       created_at:
@@ -207,6 +242,77 @@ info:
   title: Kelic Restaurant API
   version: "1.0"
 paths:
+  /ai/chat:
+    post:
+      consumes:
+      - application/json
+      description: Streaming SSE endpoint — vraća Server-Sent Events
+      parameters:
+      - description: Poruka
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChatRequest'
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ChatResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Pošalji poruku AI asistentu
+      tags:
+      - AI Chat
+  /ai/chat/{session_id}:
+    delete:
+      parameters:
+      - description: ID sesije
+        in: path
+        name: session_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obriši sesiju chata
+      tags:
+      - AI Chat
+    get:
+      parameters:
+      - description: ID sesije
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ChatSession'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Dohvati povijest razgovora
+      tags:
+      - AI Chat
   /health:
     get:
       description: Returns 200 if the service is up

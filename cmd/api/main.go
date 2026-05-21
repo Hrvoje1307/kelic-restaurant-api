@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/option"
 	_ "github.com/hrvojecuckovic/kelic-restaurant/docs"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/config"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/db"
@@ -32,10 +34,13 @@ func main() {
 	}
 	defer pool.Close()
 
+	aiClient := anthropic.NewClient(option.WithAPIKey(cfg.AnthropicAPIKey))
+
 	menuCategoryHandler := handlers.NewMenuCategoryHandler(repository.NewMenuCategoryRepo(pool))
 	menuItemHandler := handlers.NewMenuItemHandler(repository.NewMenuItemRepo(pool))
 	reservationHandler := handlers.NewReservationHandler(repository.NewReservationRepo(pool))
 	tableHandler := handlers.NewTableHandler(repository.NewTableRepo(pool))
+	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient)
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -86,6 +91,16 @@ func main() {
 			reservations.GET("/:id", admin, reservationHandler.GetByID)
 			reservations.PATCH("/:id", admin, reservationHandler.UpdateStatus)
 			reservations.DELETE("/:id", auth, reservationHandler.Delete)
+		}
+
+		ai := api.Group("/ai")
+		{
+			chat := ai.Group("/chat")
+			{
+				chat.POST("", chatHandler.Chat)
+				chat.GET("/:session_id", chatHandler.GetHistory)
+				chat.DELETE("/:session_id", chatHandler.DeleteSession)
+			}
 		}
 	}
 
