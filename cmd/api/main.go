@@ -33,6 +33,7 @@ func main() {
 	defer pool.Close()
 
 	menuCategoryHandler := handlers.NewMenuCategoryHandler(repository.NewMenuCategoryRepo(pool))
+	menuItemHandler := handlers.NewMenuItemHandler(repository.NewMenuItemRepo(pool))
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -53,6 +54,15 @@ func main() {
 				categories.POST("", admin, menuCategoryHandler.Create)
 				categories.PUT("/:id", admin, menuCategoryHandler.Update)
 				categories.DELETE("/:id", admin, menuCategoryHandler.Delete)
+			}
+
+			items := menu.Group("/items")
+			{
+				items.GET("", menuItemHandler.List)
+				items.GET("/:id", menuItemHandler.GetByID)
+				items.POST("", admin, menuItemHandler.Create)
+				items.PUT("/:id", admin, menuItemHandler.Update)
+				items.DELETE("/:id", admin, menuItemHandler.Delete)
 			}
 		}
 	}

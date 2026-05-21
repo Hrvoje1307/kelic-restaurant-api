@@ -55,7 +55,10 @@ func (r *MenuCategoryRepo) Update(ctx context.Context, id string, input models.M
 		 RETURNING id, name, description, sort_order, created_at`,
 		input.Name, input.Description, input.SortOrder, id,
 	).Scan(&c.ID, &c.Name, &c.Description, &c.SortOrder, &c.CreatedAt)
-	return c, err
+	if err != nil {
+		return c, mapNotFound(err)
+	}
+	return c, nil
 }
 
 func (r *MenuCategoryRepo) Delete(ctx context.Context, id string) error {
