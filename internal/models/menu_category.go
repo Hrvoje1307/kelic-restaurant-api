@@ -5,7 +5,7 @@ import "time"
 type MenuCategory struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
-	Description string    `json:"description,omitempty"`
+	Description *string   `json:"description"`
 	SortOrder   int       `json:"sort_order"`
 	CreatedAt   time.Time `json:"created_at"`
 }
