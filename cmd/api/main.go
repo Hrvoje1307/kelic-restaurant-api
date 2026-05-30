@@ -52,7 +52,7 @@ func main() {
 	responseCache := cache.New(24 * time.Hour)
 	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient, string(promptBytes), responseCache)
 	userHandler := handlers.NewUserHandler(repository.NewUserRepo(pool))
-	authHandler := handlers.NewAuthHandler(cfg.SupabaseURL, cfg.SupabaseAnonKey)
+	authHandler := handlers.NewAuthHandler(repository.NewAdminRepo(pool), cfg.JWTSecret)
 
 	r := gin.Default()
 	r.Use(middleware.CORS())

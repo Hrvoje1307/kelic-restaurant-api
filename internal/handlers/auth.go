@@ -1,23 +1,24 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
+	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/models"
+	"github.com/hrvojecuckovic/kelic-restaurant/internal/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
-	supabaseURL     string
-	supabaseAnonKey string
+	repo      *repository.AdminRepo
+	jwtSecret []byte
 }
 
-func NewAuthHandler(supabaseURL, supabaseAnonKey string) *AuthHandler {
-	return &AuthHandler{supabaseURL: supabaseURL, supabaseAnonKey: supabaseAnonKey}
+func NewAuthHandler(repo *repository.AdminRepo, jwtSecret string) *AuthHandler {
+	return &AuthHandler{repo: repo, jwtSecret: []byte(jwtSecret)}
 }
 
 // AdminLogin godoc
@@ -39,56 +40,39 @@ func (h *AuthHandler) AdminLogin(c *gin.Context) {
 		return
 	}
 
-	body, _ := json.Marshal(map[string]string{
-		"email":    input.Email,
-		"password": input.Password,
-	})
-
-	req, _ := http.NewRequestWithContext(c.Request.Context(), http.MethodPost,
-		fmt.Sprintf("%s/auth/v1/token?grant_type=password", h.supabaseURL),
-		bytes.NewReader(body),
-	)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("apikey", h.supabaseAnonKey)
-
-	resp, err := http.DefaultClient.Do(req)
+	admin, err := h.repo.GetByEmail(c.Request.Context(), input.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "auth service unavailable"})
+		if errors.Is(err, repository.ErrNotFound) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials", "code": "UNAUTHORIZED"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
-	raw, _ := io.ReadAll(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
+	if err := bcrypt.CompareHashAndPassword([]byte(admin.PasswordHash), []byte(input.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials", "code": "UNAUTHORIZED"})
 		return
 	}
 
-	var supabaseResp struct {
-		AccessToken string `json:"access_token"`
-		TokenType   string `json:"token_type"`
-		ExpiresIn   int    `json:"expires_in"`
-		User        struct {
-			UserMetadata struct {
-				Role string `json:"role"`
-			} `json:"user_metadata"`
-		} `json:"user"`
-	}
-	if err := json.Unmarshal(raw, &supabaseResp); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse auth response"})
-		return
-	}
+	expiresIn := 24 * time.Hour
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":   admin.ID,
+		"email": admin.Email,
+		"role":  admin.Role,
+		"exp":   time.Now().Add(expiresIn).Unix(),
+		"iat":   time.Now().Unix(),
+	})
 
-	role := supabaseResp.User.UserMetadata.Role
-	if role != "admin" && role != "superadmin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient permissions", "code": "FORBIDDEN"})
+	signed, err := token.SignedString(h.jwtSecret)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to sign token"})
 		return
 	}
 
 	c.JSON(http.StatusOK, models.AdminLoginResponse{
-		AccessToken: supabaseResp.AccessToken,
-		TokenType:   supabaseResp.TokenType,
-		ExpiresIn:   supabaseResp.ExpiresIn,
+		AccessToken: signed,
+		TokenType:   "bearer",
+		ExpiresIn:   int(expiresIn.Seconds()),
 	})
 }
