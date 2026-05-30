@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type ChatMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -19,4 +21,10 @@ type ChatResponse struct {
 type ChatSession struct {
 	SessionID string        `json:"session_id"`
 	Messages  []ChatMessage `json:"messages"`
+}
+
+type ChatSessionSummary struct {
+	SessionID    string    `json:"session_id"`
+	MessageCount int       `json:"message_count"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }

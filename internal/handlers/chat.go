@@ -150,6 +150,21 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 	_ = h.repo.SaveMessages(context.Background(), input.SessionID, history)
 }
 
+// ListSessions godoc
+// @Summary      Dohvati sve chat sesije
+// @Tags         AI Chat
+// @Produce      json
+// @Success      200  {array}   models.ChatSessionSummary
+// @Router       /ai/chats [get]
+func (h *ChatHandler) ListSessions(c *gin.Context) {
+	sessions, err := h.repo.ListAll(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, sessions)
+}
+
 // GetHistory godoc
 // @Summary      Dohvati povijest razgovora
 // @Tags         AI Chat

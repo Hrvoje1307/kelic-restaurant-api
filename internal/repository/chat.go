@@ -46,6 +46,29 @@ func (r *ChatRepo) SaveMessages(ctx context.Context, sessionID string, messages 
 	return err
 }
 
+func (r *ChatRepo) ListAll(ctx context.Context) ([]models.ChatSessionSummary, error) {
+	rows, err := r.db.Query(ctx,
+		`SELECT session_id, jsonb_array_length(messages), updated_at FROM chat_sessions ORDER BY updated_at DESC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var sessions []models.ChatSessionSummary
+	for rows.Next() {
+		var s models.ChatSessionSummary
+		if err := rows.Scan(&s.SessionID, &s.MessageCount, &s.UpdatedAt); err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, s)
+	}
+	if sessions == nil {
+		sessions = []models.ChatSessionSummary{}
+	}
+	return sessions, nil
+}
+
 func (r *ChatRepo) Delete(ctx context.Context, sessionID string) error {
 	result, err := r.db.Exec(ctx, `DELETE FROM chat_sessions WHERE session_id = $1`, sessionID)
 	if err != nil {

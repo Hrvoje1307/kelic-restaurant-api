@@ -106,6 +106,7 @@ func main() {
 
 		ai := api.Group("/ai")
 		{
+			ai.GET("/chats", admin, chatHandler.ListSessions)
 			chat := ai.Group("/chat")
 			{
 				chat.POST("", chatHandler.Chat)

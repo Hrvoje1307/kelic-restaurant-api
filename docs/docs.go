@@ -124,6 +124,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/chats": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI Chat"
+                ],
+                "summary": "Dohvati sve chat sesije",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ChatSessionSummary"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Returns 200 if the service is up",
@@ -1540,6 +1562,20 @@ const docTemplate = `{
                     }
                 },
                 "session_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ChatSessionSummary": {
+            "type": "object",
+            "properties": {
+                "message_count": {
+                    "type": "integer"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

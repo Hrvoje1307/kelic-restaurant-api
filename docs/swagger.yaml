@@ -44,6 +44,15 @@ definitions:
       session_id:
         type: string
     type: object
+  models.ChatSessionSummary:
+    properties:
+      message_count:
+        type: integer
+      session_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
   models.MenuCategory:
     properties:
       created_at:
@@ -348,6 +357,20 @@ paths:
               type: string
             type: object
       summary: Dohvati povijest razgovora
+      tags:
+      - AI Chat
+  /ai/chats:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ChatSessionSummary'
+            type: array
+      summary: Dohvati sve chat sesije
       tags:
       - AI Chat
   /health:
