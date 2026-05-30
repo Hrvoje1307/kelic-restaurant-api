@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -36,11 +37,16 @@ func main() {
 
 	aiClient := anthropic.NewClient(option.WithAPIKey(cfg.AnthropicAPIKey))
 
+	promptBytes, err := os.ReadFile("prompts/starter.txt")
+	if err != nil {
+		log.Fatalf("Failed to read system prompt: %v", err)
+	}
+
 	menuCategoryHandler := handlers.NewMenuCategoryHandler(repository.NewMenuCategoryRepo(pool))
 	menuItemHandler := handlers.NewMenuItemHandler(repository.NewMenuItemRepo(pool))
 	reservationHandler := handlers.NewReservationHandler(repository.NewReservationRepo(pool))
 	tableHandler := handlers.NewTableHandler(repository.NewTableRepo(pool))
-	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient)
+	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient, string(promptBytes))
 	userHandler := handlers.NewUserHandler(repository.NewUserRepo(pool))
 
 	r := gin.Default()

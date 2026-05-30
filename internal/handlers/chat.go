@@ -14,22 +14,14 @@ import (
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/repository"
 )
 
-const restaurantSystemPrompt = `Ti si ljubazni AI asistent restorana Kelic.
-Pomaži gostima s informacijama o meniju, rezervacijama, alergenima, radnom vremenu i posebnim ponudama.
-
-Radno vrijeme: ponedjeljak–nedjelja 12:00–22:00.
-Rezervacije su moguće od 12:00 do 21:00 svakih sat vremena, trajanje je standardno 90 minuta.
-Lokacije stolova: unutra, terasa, vip.
-
-Odgovaraj kratko i ljubazno. Ako trebaš specifične informacije o dostupnosti, uputi gosta da provjeri na stranici za rezervacije.`
-
 type ChatHandler struct {
-	repo *repository.ChatRepo
-	ai   *anthropic.Client
+	repo         *repository.ChatRepo
+	ai           *anthropic.Client
+	systemPrompt string
 }
 
-func NewChatHandler(repo *repository.ChatRepo, ai *anthropic.Client) *ChatHandler {
-	return &ChatHandler{repo: repo, ai: ai}
+func NewChatHandler(repo *repository.ChatRepo, ai *anthropic.Client, systemPrompt string) *ChatHandler {
+	return &ChatHandler{repo: repo, ai: ai, systemPrompt: systemPrompt}
 }
 
 // Chat godoc
@@ -82,7 +74,7 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 	stream := h.ai.Messages.NewStreaming(c.Request.Context(), anthropic.MessageNewParams{
 		Model:     anthropic.ModelClaudeHaiku4_5,
 		MaxTokens: 1024,
-		System:    []anthropic.TextBlockParam{{Text: restaurantSystemPrompt}},
+		System:    []anthropic.TextBlockParam{{Text: h.systemPrompt}},
 		Messages:  msgParams,
 	})
 
