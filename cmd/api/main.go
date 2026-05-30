@@ -52,6 +52,7 @@ func main() {
 	responseCache := cache.New(24 * time.Hour)
 	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient, string(promptBytes), responseCache)
 	userHandler := handlers.NewUserHandler(repository.NewUserRepo(pool))
+	authHandler := handlers.NewAuthHandler(cfg.SupabaseURL, cfg.SupabaseAnonKey)
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -65,6 +66,7 @@ func main() {
 	api := r.Group("/api/v1")
 	{
 		api.GET("/health", handlers.Health)
+		api.POST("/auth/login", authHandler.AdminLogin)
 
 		menu := api.Group("/menu")
 		{

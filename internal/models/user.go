@@ -21,3 +21,14 @@ type UserProfileInput struct {
 type UserRoleUpdate struct {
 	Role string `json:"role" binding:"required,oneof=guest admin superadmin"`
 }
+
+type AdminLoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type AdminLoginResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+}

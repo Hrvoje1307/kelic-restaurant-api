@@ -8,11 +8,13 @@ import (
 )
 
 type Config struct {
-	Port             string
-	DSN              string
-	GinMode          string
-	JWTSecret        string
-	AnthropicAPIKey  string
+	Port            string
+	DSN             string
+	GinMode         string
+	JWTSecret       string
+	AnthropicAPIKey string
+	SupabaseURL     string
+	SupabaseAnonKey string
 }
 
 func Load() *Config {
@@ -26,6 +28,8 @@ func Load() *Config {
 		GinMode:         getEnv("GIN_MODE", "debug"),
 		JWTSecret:       getEnv("JWT_SECRET", ""),
 		AnthropicAPIKey: getEnv("ANTHROPIC_API_KEY", ""),
+		SupabaseURL:     getEnv("SUPABASE_URL", ""),
+		SupabaseAnonKey: getEnv("SUPABASE_ANON_KEY", ""),
 	}
 }
 
