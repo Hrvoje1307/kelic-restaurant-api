@@ -1,4 +1,7 @@
 {
+    "schemes": [
+        "https"
+    ],
     "swagger": "2.0",
     "info": {
         "description": "Backend API for Kelic Restaurant",
@@ -6,7 +9,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "kelic-restaurant-api-production.up.railway.app",
     "basePath": "/api/v1",
     "paths": {
         "/ai/chat": {

@@ -23,8 +23,9 @@ import (
 // @title           Kelic Restaurant API
 // @version         1.0
 // @description     Backend API for Kelic Restaurant
-// @host            localhost:8080
+// @host            kelic-restaurant-api-production.up.railway.app
 // @BasePath        /api/v1
+// @schemes         https
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization

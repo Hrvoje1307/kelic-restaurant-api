@@ -281,7 +281,7 @@ definitions:
     required:
     - role
     type: object
-host: localhost:8080
+host: kelic-restaurant-api-production.up.railway.app
 info:
   contact: {}
   description: Backend API for Kelic Restaurant
@@ -1238,6 +1238,8 @@ paths:
       summary: Ažuriraj vlastiti profil
       tags:
       - Korisnici
+schemes:
+- https
 securityDefinitions:
   BearerAuth:
     in: header
