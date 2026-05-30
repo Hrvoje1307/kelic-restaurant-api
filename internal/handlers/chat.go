@@ -10,6 +10,7 @@ import (
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/gin-gonic/gin"
+	"github.com/hrvojecuckovic/kelic-restaurant/internal/cache"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/models"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/repository"
 )
@@ -18,10 +19,11 @@ type ChatHandler struct {
 	repo         *repository.ChatRepo
 	ai           *anthropic.Client
 	systemPrompt string
+	cache        *cache.ResponseCache
 }
 
-func NewChatHandler(repo *repository.ChatRepo, ai *anthropic.Client, systemPrompt string) *ChatHandler {
-	return &ChatHandler{repo: repo, ai: ai, systemPrompt: systemPrompt}
+func NewChatHandler(repo *repository.ChatRepo, ai *anthropic.Client, systemPrompt string, c *cache.ResponseCache) *ChatHandler {
+	return &ChatHandler{repo: repo, ai: ai, systemPrompt: systemPrompt, cache: c}
 }
 
 // Chat godoc
@@ -51,6 +53,31 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 	}
 
 	history = append(history, models.ChatMessage{Role: "user", Content: input.Message})
+
+	// For first-message questions (FAQs) return a cached answer without hitting the API.
+	isFAQ := len(history) == 1
+	cacheKey := cache.NormalizeKey(input.Message)
+	if isFAQ {
+		if cached, ok := h.cache.Get(cacheKey); ok {
+			c.Header("Content-Type", "text/event-stream")
+			c.Header("Cache-Control", "no-cache")
+			c.Header("Connection", "keep-alive")
+			c.Header("X-Accel-Buffering", "no")
+
+			resp := models.ChatResponse{SessionID: input.SessionID, Message: cached, Done: false}
+			data, _ := json.Marshal(resp)
+			fmt.Fprintf(c.Writer, "data: %s\n\n", data)
+
+			done := models.ChatResponse{SessionID: input.SessionID, Done: true}
+			data, _ = json.Marshal(done)
+			fmt.Fprintf(c.Writer, "data: %s\n\n", data)
+			c.Writer.Flush()
+
+			newHistory := append(history, models.ChatMessage{Role: "assistant", Content: cached})
+			_ = h.repo.SaveMessages(context.Background(), input.SessionID, newHistory)
+			return
+		}
+	}
 
 	var msgParams []anthropic.MessageParam
 	for _, m := range history {
@@ -115,7 +142,11 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 	fmt.Fprintf(c.Writer, "data: %s\n\n", data)
 	c.Writer.Flush()
 
-	history = append(history, models.ChatMessage{Role: "assistant", Content: fullResponse.String()})
+	answer := fullResponse.String()
+	if isFAQ {
+		h.cache.Set(cacheKey, answer)
+	}
+	history = append(history, models.ChatMessage{Role: "assistant", Content: answer})
 	_ = h.repo.SaveMessages(context.Background(), input.SessionID, history)
 }
 

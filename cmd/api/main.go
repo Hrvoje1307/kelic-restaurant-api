@@ -3,10 +3,12 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	_ "github.com/hrvojecuckovic/kelic-restaurant/docs"
+	"github.com/hrvojecuckovic/kelic-restaurant/internal/cache"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/config"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/db"
 	"github.com/hrvojecuckovic/kelic-restaurant/internal/handlers"
@@ -46,7 +48,8 @@ func main() {
 	menuItemHandler := handlers.NewMenuItemHandler(repository.NewMenuItemRepo(pool))
 	reservationHandler := handlers.NewReservationHandler(repository.NewReservationRepo(pool))
 	tableHandler := handlers.NewTableHandler(repository.NewTableRepo(pool))
-	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient, string(promptBytes))
+	responseCache := cache.New(24 * time.Hour)
+	chatHandler := handlers.NewChatHandler(repository.NewChatRepo(pool), &aiClient, string(promptBytes), responseCache)
 	userHandler := handlers.NewUserHandler(repository.NewUserRepo(pool))
 
 	r := gin.Default()
