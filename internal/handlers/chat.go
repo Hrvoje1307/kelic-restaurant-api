@@ -154,7 +154,7 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 // @Summary      Dohvati sve chat sesije
 // @Tags         AI Chat
 // @Produce      json
-// @Success      200  {array}   models.ChatSessionSummary
+// @Success      200  {array}   models.ChatSessionFull
 // @Router       /ai/chats [get]
 func (h *ChatHandler) ListSessions(c *gin.Context) {
 	sessions, err := h.repo.ListAll(c.Request.Context())

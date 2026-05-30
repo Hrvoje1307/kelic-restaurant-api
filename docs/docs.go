@@ -139,7 +139,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.ChatSessionSummary"
+                                "$ref": "#/definitions/models.ChatSessionFull"
                             }
                         }
                     }
@@ -1656,11 +1656,14 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ChatSessionSummary": {
+        "models.ChatSessionFull": {
             "type": "object",
             "properties": {
-                "message_count": {
-                    "type": "integer"
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ChatMessage"
+                    }
                 },
                 "session_id": {
                     "type": "string"

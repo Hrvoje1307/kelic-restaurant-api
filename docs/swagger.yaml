@@ -63,10 +63,12 @@ definitions:
       session_id:
         type: string
     type: object
-  models.ChatSessionSummary:
+  models.ChatSessionFull:
     properties:
-      message_count:
-        type: integer
+      messages:
+        items:
+          $ref: '#/definitions/models.ChatMessage'
+        type: array
       session_id:
         type: string
       updated_at:
@@ -387,7 +389,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.ChatSessionSummary'
+              $ref: '#/definitions/models.ChatSessionFull'
             type: array
       summary: Dohvati sve chat sesije
       tags:

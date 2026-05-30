@@ -23,8 +23,8 @@ type ChatSession struct {
 	Messages  []ChatMessage `json:"messages"`
 }
 
-type ChatSessionSummary struct {
-	SessionID    string    `json:"session_id"`
-	MessageCount int       `json:"message_count"`
-	UpdatedAt    time.Time `json:"updated_at"`
+type ChatSessionFull struct {
+	SessionID string        `json:"session_id"`
+	Messages  []ChatMessage `json:"messages"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
