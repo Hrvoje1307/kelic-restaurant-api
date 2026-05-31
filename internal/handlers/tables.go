@@ -17,13 +17,6 @@ func NewTableHandler(repo *repository.TableRepo) *TableHandler {
 	return &TableHandler{repo: repo}
 }
 
-// List godoc
-// @Summary      Dohvati sve stolove
-// @Description  Javni endpoint
-// @Tags         Stolovi
-// @Produce      json
-// @Success      200  {array}  models.Table
-// @Router       /tables [get]
 func (h *TableHandler) List(c *gin.Context) {
 	list, err := h.repo.List(c.Request.Context())
 	if err != nil {
@@ -36,18 +29,6 @@ func (h *TableHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// Create godoc
-// @Summary      Dodaj stol (admin)
-// @Tags         Stolovi
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        input  body      models.TableInput  true  "Stol"
-// @Success      201    {object}  models.Table
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Router       /tables [post]
 func (h *TableHandler) Create(c *gin.Context) {
 	var input models.TableInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -62,20 +43,6 @@ func (h *TableHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, t)
 }
 
-// Update godoc
-// @Summary      Ažuriraj stol (admin)
-// @Tags         Stolovi
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id     path      string             true  "UUID stola"
-// @Param        input  body      models.TableInput  true  "Stol"
-// @Success      200    {object}  models.Table
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Failure      404    {object}  map[string]string
-// @Router       /tables/{id} [put]
 func (h *TableHandler) Update(c *gin.Context) {
 	var input models.TableInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -94,16 +61,6 @@ func (h *TableHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, t)
 }
 
-// Delete godoc
-// @Summary      Obriši stol (admin)
-// @Tags         Stolovi
-// @Security     BearerAuth
-// @Param        id   path  string  true  "UUID stola"
-// @Success      204
-// @Failure      401  {object}  map[string]string
-// @Failure      403  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
-// @Router       /tables/{id} [delete]
 func (h *TableHandler) Delete(c *gin.Context) {
 	if err := h.repo.Delete(c.Request.Context(), c.Param("id")); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {

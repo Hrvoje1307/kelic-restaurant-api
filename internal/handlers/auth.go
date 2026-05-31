@@ -21,18 +21,6 @@ func NewAuthHandler(repo *repository.AdminRepo, jwtSecret string) *AuthHandler {
 	return &AuthHandler{repo: repo, jwtSecret: []byte(jwtSecret)}
 }
 
-// AdminLogin godoc
-// @Summary      Admin login
-// @Description  Authenticates an admin or superadmin and returns a JWT token
-// @Tags         Auth
-// @Accept       json
-// @Produce      json
-// @Param        input  body      models.AdminLoginRequest   true  "Credentials"
-// @Success      200    {object}  models.AdminLoginResponse
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Router       /auth/login [post]
 func (h *AuthHandler) AdminLogin(c *gin.Context) {
 	var input models.AdminLoginRequest
 	if err := c.ShouldBindJSON(&input); err != nil {

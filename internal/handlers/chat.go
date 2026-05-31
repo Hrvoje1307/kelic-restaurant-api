@@ -26,16 +26,6 @@ func NewChatHandler(repo *repository.ChatRepo, ai *anthropic.Client, systemPromp
 	return &ChatHandler{repo: repo, ai: ai, systemPrompt: systemPrompt, cache: c}
 }
 
-// Chat godoc
-// @Summary      Pošalji poruku AI asistentu
-// @Description  Streaming SSE endpoint — vraća Server-Sent Events
-// @Tags         AI Chat
-// @Accept       json
-// @Produce      text/event-stream
-// @Param        input  body  models.ChatRequest  true  "Poruka"
-// @Success      200    {object}  models.ChatResponse
-// @Failure      400    {object}  map[string]string
-// @Router       /ai/chat [post]
 func (h *ChatHandler) Chat(c *gin.Context) {
 	var input models.ChatRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -150,12 +140,6 @@ func (h *ChatHandler) Chat(c *gin.Context) {
 	_ = h.repo.SaveMessages(context.Background(), input.SessionID, history)
 }
 
-// ListSessions godoc
-// @Summary      Dohvati sve chat sesije
-// @Tags         AI Chat
-// @Produce      json
-// @Success      200  {array}   models.ChatSessionFull
-// @Router       /ai/chats [get]
 func (h *ChatHandler) ListSessions(c *gin.Context) {
 	sessions, err := h.repo.ListAll(c.Request.Context())
 	if err != nil {
@@ -165,14 +149,6 @@ func (h *ChatHandler) ListSessions(c *gin.Context) {
 	c.JSON(http.StatusOK, sessions)
 }
 
-// GetHistory godoc
-// @Summary      Dohvati povijest razgovora
-// @Tags         AI Chat
-// @Produce      json
-// @Param        session_id  path      string  true  "ID sesije"
-// @Success      200         {object}  models.ChatSession
-// @Failure      404         {object}  map[string]string
-// @Router       /ai/chat/{session_id} [get]
 func (h *ChatHandler) GetHistory(c *gin.Context) {
 	sessionID := c.Param("session_id")
 	messages, err := h.repo.GetHistory(c.Request.Context(), sessionID)
@@ -193,13 +169,6 @@ func (h *ChatHandler) GetHistory(c *gin.Context) {
 	})
 }
 
-// DeleteSession godoc
-// @Summary      Obriši sesiju chata
-// @Tags         AI Chat
-// @Param        session_id  path  string  true  "ID sesije"
-// @Success      204
-// @Failure      404  {object}  map[string]string
-// @Router       /ai/chat/{session_id} [delete]
 func (h *ChatHandler) DeleteSession(c *gin.Context) {
 	if err := h.repo.Delete(c.Request.Context(), c.Param("session_id")); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {

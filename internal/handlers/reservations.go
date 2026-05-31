@@ -18,18 +18,6 @@ func NewReservationHandler(repo *repository.ReservationRepo) *ReservationHandler
 	return &ReservationHandler{repo: repo}
 }
 
-// List godoc
-// @Summary      Dohvati rezervacije (admin)
-// @Tags         Rezervacije
-// @Produce      json
-// @Security     BearerAuth
-// @Param        date      query  string  false  "Filter po datumu (YYYY-MM-DD)"
-// @Param        status    query  string  false  "Filter po statusu"  Enums(pending,confirmed,cancelled,completed)
-// @Param        table_id  query  string  false  "Filter po stolu (UUID)"
-// @Success      200  {array}   models.Reservation
-// @Failure      401  {object}  map[string]string
-// @Failure      403  {object}  map[string]string
-// @Router       /reservations [get]
 func (h *ReservationHandler) List(c *gin.Context) {
 	filter := repository.ReservationFilter{
 		Date:    c.Query("date"),
@@ -47,17 +35,6 @@ func (h *ReservationHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// Create godoc
-// @Summary      Kreiraj rezervaciju
-// @Description  Javni endpoint — gost ne treba biti prijavljen
-// @Tags         Rezervacije
-// @Accept       json
-// @Produce      json
-// @Param        input  body      models.ReservationInput  true  "Rezervacija"
-// @Success      201    {object}  models.Reservation
-// @Failure      400    {object}  map[string]string
-// @Failure      409    {object}  map[string]string
-// @Router       /reservations [post]
 func (h *ReservationHandler) Create(c *gin.Context) {
 	var input models.ReservationInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -72,16 +49,6 @@ func (h *ReservationHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, res)
 }
 
-// Availability godoc
-// @Summary      Provjeri slobodne termine
-// @Description  Javni endpoint — za prikaz dostupnih termina u formi
-// @Tags         Rezervacije
-// @Produce      json
-// @Param        date        query  string  true  "Datum (YYYY-MM-DD)"
-// @Param        party_size  query  int     true  "Broj gostiju"
-// @Success      200  {object}  models.AvailabilityResponse
-// @Failure      400  {object}  map[string]string
-// @Router       /reservations/availability [get]
 func (h *ReservationHandler) Availability(c *gin.Context) {
 	date := c.Query("date")
 	if date == "" {
@@ -122,14 +89,6 @@ func (h *ReservationHandler) Availability(c *gin.Context) {
 	})
 }
 
-// MyReservations godoc
-// @Summary      Moje rezervacije (gost)
-// @Tags         Rezervacije
-// @Produce      json
-// @Security     BearerAuth
-// @Success      200  {array}   models.Reservation
-// @Failure      401  {object}  map[string]string
-// @Router       /reservations/my [get]
 func (h *ReservationHandler) MyReservations(c *gin.Context) {
 	email, _ := c.Get("email")
 	emailStr, ok := email.(string)
@@ -148,16 +107,6 @@ func (h *ReservationHandler) MyReservations(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// GetByID godoc
-// @Summary      Dohvati rezervaciju (admin)
-// @Tags         Rezervacije
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id   path      string  true  "UUID rezervacije"
-// @Success      200  {object}  models.Reservation
-// @Failure      401  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
-// @Router       /reservations/{id} [get]
 func (h *ReservationHandler) GetByID(c *gin.Context) {
 	res, err := h.repo.GetByID(c.Request.Context(), c.Param("id"))
 	if err != nil {
@@ -171,20 +120,6 @@ func (h *ReservationHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// UpdateStatus godoc
-// @Summary      Promijeni status rezervacije (admin)
-// @Tags         Rezervacije
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id     path      string                          true  "UUID rezervacije"
-// @Param        input  body      models.ReservationStatusUpdate  true  "Novi status"
-// @Success      200    {object}  models.Reservation
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Failure      404    {object}  map[string]string
-// @Router       /reservations/{id} [patch]
 func (h *ReservationHandler) UpdateStatus(c *gin.Context) {
 	var input models.ReservationStatusUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -203,17 +138,6 @@ func (h *ReservationHandler) UpdateStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// Delete godoc
-// @Summary      Otkaži rezervaciju
-// @Description  Gost može otkazati svoju, admin može otkazati bilo koju
-// @Tags         Rezervacije
-// @Security     BearerAuth
-// @Param        id   path  string  true  "UUID rezervacije"
-// @Success      204
-// @Failure      401  {object}  map[string]string
-// @Failure      403  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
-// @Router       /reservations/{id} [delete]
 func (h *ReservationHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	role, _ := c.Get("role")

@@ -17,15 +17,6 @@ func NewUserHandler(repo *repository.UserRepo) *UserHandler {
 	return &UserHandler{repo: repo}
 }
 
-// GetMe godoc
-// @Summary      Dohvati vlastiti profil
-// @Tags         Korisnici
-// @Produce      json
-// @Security     BearerAuth
-// @Success      200  {object}  models.UserProfile
-// @Failure      401  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
-// @Router       /users/me [get]
 func (h *UserHandler) GetMe(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	id, ok := userID.(string)
@@ -45,17 +36,6 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, u)
 }
 
-// UpdateMe godoc
-// @Summary      Ažuriraj vlastiti profil
-// @Tags         Korisnici
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        input  body      models.UserProfileInput  true  "Profil"
-// @Success      200    {object}  models.UserProfile
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Router       /users/me [put]
 func (h *UserHandler) UpdateMe(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	id, ok := userID.(string)
@@ -76,16 +56,6 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 	c.JSON(http.StatusOK, u)
 }
 
-// List godoc
-// @Summary      Dohvati sve korisnike (admin)
-// @Tags         Korisnici
-// @Produce      json
-// @Security     BearerAuth
-// @Param        role  query  string  false  "Filter po ulozi"  Enums(guest,admin,superadmin)
-// @Success      200   {array}   models.UserProfile
-// @Failure      401   {object}  map[string]string
-// @Failure      403   {object}  map[string]string
-// @Router       /users [get]
 func (h *UserHandler) List(c *gin.Context) {
 	list, err := h.repo.List(c.Request.Context(), c.Query("role"))
 	if err != nil {
@@ -98,20 +68,6 @@ func (h *UserHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// UpdateRole godoc
-// @Summary      Promijeni ulogu korisnika (superadmin)
-// @Tags         Korisnici
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id     path      string                true  "UUID korisnika"
-// @Param        input  body      models.UserRoleUpdate  true  "Nova uloga"
-// @Success      200    {object}  models.UserProfile
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Failure      404    {object}  map[string]string
-// @Router       /users/{id}/role [patch]
 func (h *UserHandler) UpdateRole(c *gin.Context) {
 	var input models.UserRoleUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {

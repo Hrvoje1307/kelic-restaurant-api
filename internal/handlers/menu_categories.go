@@ -17,13 +17,6 @@ func NewMenuCategoryHandler(repo *repository.MenuCategoryRepo) *MenuCategoryHand
 	return &MenuCategoryHandler{repo: repo}
 }
 
-// List godoc
-// @Summary      Dohvati sve kategorije
-// @Description  Javni endpoint — ne treba autentikaciju
-// @Tags         Meni
-// @Produce      json
-// @Success      200  {array}   models.MenuCategory
-// @Router       /menu/categories [get]
 func (h *MenuCategoryHandler) List(c *gin.Context) {
 	cats, err := h.repo.List(c.Request.Context())
 	if err != nil {
@@ -36,18 +29,6 @@ func (h *MenuCategoryHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, cats)
 }
 
-// Create godoc
-// @Summary      Kreiraj kategoriju (admin)
-// @Tags         Meni
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        input  body      models.MenuCategoryInput  true  "Kategorija"
-// @Success      201    {object}  models.MenuCategory
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Router       /menu/categories [post]
 func (h *MenuCategoryHandler) Create(c *gin.Context) {
 	var input models.MenuCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -62,20 +43,6 @@ func (h *MenuCategoryHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, cat)
 }
 
-// Update godoc
-// @Summary      Ažuriraj kategoriju (admin)
-// @Tags         Meni
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id     path      string                    true  "UUID kategorije"
-// @Param        input  body      models.MenuCategoryInput  true  "Kategorija"
-// @Success      200    {object}  models.MenuCategory
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Failure      404    {object}  map[string]string
-// @Router       /menu/categories/{id} [put]
 func (h *MenuCategoryHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	var input models.MenuCategoryInput
@@ -95,16 +62,6 @@ func (h *MenuCategoryHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, cat)
 }
 
-// Delete godoc
-// @Summary      Obriši kategoriju (admin)
-// @Tags         Meni
-// @Security     BearerAuth
-// @Param        id   path  string  true  "UUID kategorije"
-// @Success      204
-// @Failure      401  {object}  map[string]string
-// @Failure      403  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
-// @Router       /menu/categories/{id} [delete]
 func (h *MenuCategoryHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.repo.Delete(c.Request.Context(), id); err != nil {

@@ -17,15 +17,6 @@ func NewMenuItemHandler(repo *repository.MenuItemRepo) *MenuItemHandler {
 	return &MenuItemHandler{repo: repo}
 }
 
-// List godoc
-// @Summary      Dohvati sve stavke menija
-// @Description  Javni endpoint. Filtriranje po kategoriji i dostupnosti.
-// @Tags         Meni
-// @Produce      json
-// @Param        category_id     query  string  false  "UUID kategorije"
-// @Param        available_only  query  bool    false  "Samo dostupne stavke"  default(true)
-// @Success      200  {array}   models.MenuItem
-// @Router       /menu/items [get]
 func (h *MenuItemHandler) List(c *gin.Context) {
 	filter := repository.MenuItemFilter{
 		AvailableOnly: c.DefaultQuery("available_only", "true") == "true",
@@ -45,14 +36,6 @@ func (h *MenuItemHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
-// GetByID godoc
-// @Summary      Dohvati jednu stavku
-// @Tags         Meni
-// @Produce      json
-// @Param        id   path      string  true  "UUID stavke"
-// @Success      200  {object}  models.MenuItem
-// @Failure      404  {object}  map[string]string
-// @Router       /menu/items/{id} [get]
 func (h *MenuItemHandler) GetByID(c *gin.Context) {
 	item, err := h.repo.GetByID(c.Request.Context(), c.Param("id"))
 	if err != nil {
@@ -66,18 +49,6 @@ func (h *MenuItemHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
-// Create godoc
-// @Summary      Dodaj stavku menija (admin)
-// @Tags         Meni
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        input  body      models.MenuItemInput  true  "Stavka menija"
-// @Success      201    {object}  models.MenuItem
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Router       /menu/items [post]
 func (h *MenuItemHandler) Create(c *gin.Context) {
 	var input models.MenuItemInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -92,20 +63,6 @@ func (h *MenuItemHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, item)
 }
 
-// Update godoc
-// @Summary      Ažuriraj stavku (admin)
-// @Tags         Meni
-// @Accept       json
-// @Produce      json
-// @Security     BearerAuth
-// @Param        id     path      string                true  "UUID stavke"
-// @Param        input  body      models.MenuItemInput  true  "Stavka menija"
-// @Success      200    {object}  models.MenuItem
-// @Failure      400    {object}  map[string]string
-// @Failure      401    {object}  map[string]string
-// @Failure      403    {object}  map[string]string
-// @Failure      404    {object}  map[string]string
-// @Router       /menu/items/{id} [put]
 func (h *MenuItemHandler) Update(c *gin.Context) {
 	var input models.MenuItemInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -124,16 +81,6 @@ func (h *MenuItemHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, item)
 }
 
-// Delete godoc
-// @Summary      Obriši stavku (admin)
-// @Tags         Meni
-// @Security     BearerAuth
-// @Param        id   path  string  true  "UUID stavke"
-// @Success      204
-// @Failure      401  {object}  map[string]string
-// @Failure      403  {object}  map[string]string
-// @Failure      404  {object}  map[string]string
-// @Router       /menu/items/{id} [delete]
 func (h *MenuItemHandler) Delete(c *gin.Context) {
 	if err := h.repo.Delete(c.Request.Context(), c.Param("id")); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
